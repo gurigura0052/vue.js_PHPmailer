@@ -1,43 +1,52 @@
 <template>
   <form id="form" method="post">
-    <p>
-      <label class="form_label">名前 <span class="form_required">必須</span></label>：
-      <!-- 入力内容をaddform.nameに格納し、nameValid（エラーメッセージ）があればborderRedクラスをつける -->
-      <input v-model="addForm.name" v-bind:class="{ borderRed: nameValid }" class="form_input" required>
-    </p>
-    <p>
-      <!-- addForm.nameで入力内容を表示。入力内容とエラーメッセージの両方があれば：を表示。 -->
-      {{ addForm.name }}<span v-if="addForm.name && errorMessage.name">：</span>
-      <!-- エラーメッセージの表示 -->
-      {{ errorMessage.name }}
-    </p>
+    <div v-show="!send_now">
+      <p>
+        <label class="form_label">名前 <span class="form_required">必須</span></label>：
+        <!-- 入力内容をaddform.nameに格納し、nameValid（エラーメッセージ）があればborderRedクラスをつける -->
+        <input v-model="addForm.name" v-bind:class="{ borderRed: nameValid }" class="form_input" required>
+      </p>
+      <p>
+        <!-- addForm.nameで入力内容を表示。入力内容とエラーメッセージの両方があれば：を表示。 -->
+        {{ addForm.name }}<span v-if="addForm.name && errorMessage.name">：</span>
+        <!-- エラーメッセージの表示 -->
+        {{ errorMessage.name }}
+      </p>
 
-    <p>
-      <label class="form_label">電話番号 <span class="form_required">必須</span></label>：
-      <input v-model="addForm.tel" v-bind:class="{ borderRed: telValid }" type="tel" class="form_input" required>
-    </p>
-    <p>
-      {{ addForm.tel }}<span v-if="addForm.tel && errorMessage.tel">：</span>
-      {{ errorMessage.tel }}
-    </p>
+      <p>
+        <label class="form_label">電話番号 <span class="form_required">必須</span></label>：
+        <input v-model="addForm.tel" v-bind:class="{ borderRed: telValid }" type="tel" class="form_input" required>
+      </p>
+      <p>
+        {{ addForm.tel }}<span v-if="addForm.tel && errorMessage.tel">：</span>
+        {{ errorMessage.tel }}
+      </p>
 
-    <p>
-      <label class="form_label">メール <span class="form_required">必須</span></label>：
-      <input v-model="addForm.mail" v-bind:class="{ borderRed: mailValid }" type="email" class="form_input" required>
-    </p>
-    <p>
-      {{ addForm.mail }}<span v-if="addForm.mail && errorMessage.mail">：</span>
-      {{ errorMessage.mail }}
-    </p>
+      <p>
+        <label class="form_label">メール <span class="form_required">必須</span></label>：
+        <input v-model="addForm.mail" v-bind:class="{ borderRed: mailValid }" type="email" class="form_input" required>
+      </p>
+      <p>
+        {{ addForm.mail }}<span v-if="addForm.mail && errorMessage.mail">：</span>
+        {{ errorMessage.mail }}
+      </p>
 
-    <p>
-      <label class="form_label">本文</label>：
-      <textarea v-model="addForm.text" class="form_input"></textarea>
-    </p>
-    <p>{{ addForm.text }}</p>
+      <p>
+        <label class="form_label">本文</label>：
+        <textarea v-model="addForm.text" class="form_input"></textarea>
+      </p>
+      <p>{{ addForm.text }}</p>
 
-    <!-- クリックするとsendメソッドが発動。preventでページ遷移しない -->
-    <button type="submit" v-on:click.prevent="send">送信</button>
+      <!-- クリックするとsendメソッドが発動。preventでページ遷移しない -->
+      <button type="submit" v-on:click.prevent="send">送信</button>
+    </div>
+
+    <div v-show="send_now">
+      <p>
+        送信中です。<br>
+        しばらくお待ち下さい。
+      </p>
+    </div>
   </form>
 </template>
 
@@ -48,6 +57,7 @@
     name: 'mail',
     data () {
       return {
+        send_now: false,
         addForm: { // フォームに入力された内容
           name: '',
           tel: '',
@@ -130,6 +140,8 @@
 
         // フォームが正しく入力されている場合
         if (_this.isValid) {
+          _this.send_now = true
+
           var requestUrl = _this.request.url
           var requestData = _this.request.data
 
@@ -142,6 +154,7 @@
             .post(requestUrl, params)
             // 通信が成功した場合
             .then(function (response) {
+              _this.send_now = false
               if (response.data.status === 'success') {
                 alert('送信しました')
               } else if (response.data.status === 'error') {
@@ -152,6 +165,7 @@
             })
             // 通信に失敗した場合
             .catch(function (e) {
+              _this.send_now = false
               alert('送信できません。入力を確認してください')
             })
         } else { // フォームの入力が正しくない場合
